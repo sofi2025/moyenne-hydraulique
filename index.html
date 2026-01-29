@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur de Moyenne Hydraulique - S. Smahi</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f4f8; color: #333; display: flex; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; }
+        .container { width: 100%; max-width: 650px; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        h1 { color: #1a5f7a; text-align: center; margin-bottom: 5px; font-size: 1.5rem; }
+        .author-tag { text-align: center; color: #666; font-size: 0.9rem; margin-bottom: 25px; font-style: italic; }
+        .matiere-row { background: #fff; border: 1px solid #e1e8ed; padding: 15px; margin-bottom: 12px; border-radius: 10px; transition: transform 0.2s; }
+        .matiere-row:hover { transform: scale(1.01); border-color: #1a5f7a; }
+        .nom-matiere { font-weight: bold; color: #1a5f7a; margin-bottom: 10px; display: block; }
+        .inputs-flex { display: flex; gap: 10px; flex-wrap: wrap; }
+        .input-group { flex: 1; min-width: 80px; }
+        label { font-size: 0.75rem; color: #666; display: block; margin-bottom: 4px; }
+        input { width: 100%; padding: 8px; border: 2px solid #edf2f7; border-radius: 6px; outline: none; transition: border-color 0.3s; font-size: 0.9rem; box-sizing: border-box; }
+        input:focus { border-color: #1a5f7a; }
+        .footer-moyenne { position: sticky; bottom: 20px; background: #1a5f7a; color: white; padding: 20px 40px; border-radius: 50px; font-size: 1.8rem; font-weight: bold; margin-top: 30px; box-shadow: 0 5px 15px rgba(26, 95, 122, 0.4); z-index: 100; }
+        .coeff-tag { font-size: 0.7rem; background: #e1e8ed; padding: 2px 6px; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
+        footer { margin-top: auto; padding: 20px; color: #888; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Calculateur Hydraulique</h1>
+    <div class="author-tag">Développé par S. Smahi</div>
+    <div id="liste-matieres"></div>
+</div>
+
+<div class="footer-moyenne">Moyenne : <span id="total-display">0.00</span></div>
+
+<footer>&copy; 2026 S. Smahi. Tous droits réservés.</footer>
+
+<script>
+    // Configuration basée sur tes données
+    const matieres = [
+        { nom: "Géologie", c: 2, ex: 0.6, td: 0.4, tp: 0 },
+        { nom: "Hydraulique souterraine", c: 2, ex: 0.6, td: 0.4, tp: 0 },
+        { nom: "Hydrochimie", c: 3, ex: 0.6, td: 0.2, tp: 0.2 },
+        { nom: "Mécanique des sols", c: 3, ex: 0.6, td: 0.2, tp: 0.2 },
+        { nom: "Hydroéconomie", c: 1, ex: 1, td: 0, tp: 0 },
+        { nom: "Computationnelle", c: 2, ex: 0.6, td: 0.4, tp: 0 },
+        { nom: "Topographie", c: 2, ex: 0.6, td: 0, tp: 0.4 },
+        { nom: "Anglais", c: 1, ex: 0, td: 1, tp: 0 },
+        { nom: "Générale", c: 3, ex: 0.6, td: 0.2, tp: 0.2 }
+    ];
+
+    const container = document.getElementById('liste-matieres');
+
+    // Génération automatique des cases
+    matieres.forEach((m, i) => {
+        let row = document.createElement('div');
+        row.className = 'matiere-row';
+        
+        let html = `<span class="nom-matiere">${m.nom} <span class="coeff-tag">Coeff ${m.c}</span></span><div class="inputs-flex">`;
+        
+        if (m.ex > 0) html += `<div class="input-group"><label>Examen</label><input type="number" step="0.25" class="val-input" data-i="${i}" data-t="ex" placeholder="00"></div>`;
+        if (m.td > 0) html += `<div class="input-group"><label>TD</label><input type="number" step="0.25" class="val-input" data-i="${i}" data-t="td" placeholder="00"></div>`;
+        if (m.tp > 0) html += `<div class="input-group"><label>TP</label><input type="number" step="0.25" class="val-input" data-i="${i}" data-t="tp" placeholder="00"></div>`;
+        
+        html += `</div>`;
+        row.innerHTML = html;
+        container.appendChild(row);
+    });
+
+    // Calcul en temps réel
+    const allInputs = document.querySelectorAll('.val-input');
+    allInputs.forEach(input => {
+        input.addEventListener('input', () => {
+            let totalPoints = 0;
+            let totalCoeffs = 0;
+            
+            const currentNotes = Array.from({length: matieres.length}, () => ({ex: 0, td: 0, tp: 0}));
+            
+            allInputs.forEach(inp => {
+                currentNotes[inp.dataset.i][inp.dataset.t] = parseFloat(inp.value) || 0;
+            });
+
+            matieres.forEach((m, i) => {
+                let noteMoyenneMatiere = (currentNotes[i].ex * m.ex) + (currentNotes[i].td * m.td) + (currentNotes[i].tp * m.tp);
+                totalPoints += noteMoyenneMatiere * m.c;
+                totalCoeffs += m.c;
+            });
+
+            document.getElementById('total-display').innerText = (totalPoints / totalCoeffs).toFixed(2);
+        });
+    });
+</script>
+
+</body>
+</html>
